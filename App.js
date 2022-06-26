@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-// const cors = require("cors");
+const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
 const PORT = 4000;
@@ -8,11 +8,11 @@ const PORT = 4000;
 const fs = require("fs");
 const app = express();
 
-// app.use(cors());
-// app.use(express.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, "public")));
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,7 +40,7 @@ var upload = multer({
   fileFilter: fileFilter,
 });
 
-app.get("/uploadForm", upload.single("myImg"), async (req, res, next) => {
+app.post("/uploadForm", upload.single("myImg"), async (req, res, next) => {
   if (req.file) {
     console.log("Successfully saved");
     const pathName = req.file.path;
