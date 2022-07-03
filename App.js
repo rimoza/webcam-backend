@@ -1,9 +1,13 @@
+require("dotenv").config();
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
-const PORT = 4000;
+const passport = require("passport");
+const cookieSession = require("cookie-session");
+const passportSetup = require("./passport");
+const authRoute = require("./routes/auth");
 
 const fs = require("fs");
 const app = express();
@@ -14,7 +18,28 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-var storage = multer.diskStorage({
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["cyperwolve"],
+    maxAge: 24 * 60 * 60 * 100,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+);
+
+app.use("/auth", authRoute);
+
+let storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/uploads/");
   },
@@ -35,7 +60,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-var upload = multer({
+let upload = multer({
   storage: storage,
   fileFilter: fileFilter,
 });
@@ -51,6 +76,8 @@ app.post("/uploadForm", upload.single("myImg"), async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("Hello peeps!");
 });
+
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log("Server running");
+  PORT, () => console.log(`Listening on port ${PORT}...`);
 });
